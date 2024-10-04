@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 
-let persons = [
+const persons = [
     { 
       "id": 1,
       "name": "Arto Hellas", 
@@ -31,6 +31,18 @@ app.get('/', (req, res) => {
 app.get('/api/persons', (req, res) => {
   res.json(persons)
 });
+
+app.get('/info', (req, res) => {
+    const currentTime = new Date();
+    // console.log(currentTime)
+
+    res.send(
+        `
+        <p>Phonebook has info for ${persons.length} people</p>
+        <p>${currentTime.toLocaleString()}</p>
+        `
+    ) 
+})
 
 const PORT = 3001;
 app.listen(PORT, () => {
