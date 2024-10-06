@@ -34,15 +34,22 @@ app.get('/api/persons', (req, res) => {
 
 app.get('/info', (req, res) => {
     const currentTime = new Date();
-    // console.log(currentTime)
-
     res.send(
         `
         <p>Phonebook has info for ${persons.length} people</p>
         <p>${currentTime.toLocaleString()}</p>
         `
     ) 
-})
+});
+
+app.get('/api/persons/:id', (req, res) => {
+    const wanted = persons.find(
+        element => element.id === Number(req.params.id)
+    );
+    wanted
+    ? res.json(wanted)
+    : res.status(404).end()
+});
 
 const PORT = 3001;
 app.listen(PORT, () => {
