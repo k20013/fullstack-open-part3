@@ -1,12 +1,12 @@
+require('dotenv').config();
 const express = require('express');
 
 const morgan = require('morgan')
 const cors = require('cors')
-const static = require('static') 
+const static = require('static')
 
 const app = express();
-
-
+const Person = require('./models/person');
 
 const persons = [
     {
@@ -38,55 +38,58 @@ app.use(express.static('dist'));
 app.use(express.json());
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
 
-app.get('/', (req, res) => {
-    res.send('<h1>Hello World!</h1>')
-});
+// app.get('/', (req, res) => {
+//     res.send('<h1>Hello World!</h1>')
+// });
 
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
+    Person.find({}).then(p => {
+        res.json(p);
+    })
 });
 
 app.get('/info', (req, res) => {
     const currentTime = new Date();
-    res.send(
-        `
-        <p>Phonebook has info for ${persons.length} people</p>
-        <p>${currentTime.toLocaleString()}</p>
-        `
-    )
+    Person.find({}).then(p => {
+        res.send(
+            `<p>Phonebook has info for ${p.length} people</p><p>${currentTime.toLocaleString()}</p>`
+        )
+    })
 });
 
 app.get('/api/persons/:id', (req, res) => {
-    const wanted = persons.find(
-        element => element.id === Number(req.params.id)
-    );
-    wanted
-        ? res.json(wanted)
-        : res.status(404).end()
+    Person.findById(req.params.id).then(p => {
+        res.json(p);
+    });
 });
 
 app.delete('/api/persons/:id', (req, res) => {
-    const target = persons.find(element => element.id === Number(req.params.id));
-    target && persons.splice(persons.indexOf(target), 1);
-    res.status(204).end();
+    Person.deleteOne({ _id: req.params.id }).then(
+        () => res.status(204).end()
+    )
 });
 
 app.post('/api/persons', (req, res) => {
-    if(!req.body.name || !req.body.number) return res.status(400).json({ error: "content missing" });
+    if (!req.body.name || !req.body.number) return res.status(400).json({ error: "content missing" });
 
-    const newPerson = {
-        ...req.body,
-        id: Math.floor(Math.random() * 9999)
-    }
-    if(!!persons.find(element => element.name === newPerson.name)) {
-        res.status(400).json({ error: "name must be unique" })
-    } else {
-        persons.push(newPerson);
-        res.status(200).end();
-    }
+    Person.find({ name: req.body.name }).then(
+        found => {
+            if (found.length) {
+                return res.status(400).json({ error: "name must be unique" });
+            } else {
+                const person = new Person({
+                    name: req.body.name,
+                    number: req.body.number
+                });
+                person.save().then(added => res.status(200).json(added));
+            }
+        }
+    )
+
+
 });
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+    console.log(`Server running on port ${PORT}`)
 });
