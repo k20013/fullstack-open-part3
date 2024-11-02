@@ -18,10 +18,10 @@ const errorHandler = (error, req, res, next) => {
     next(error);
 }
 
+app.use(express.json());
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
 app.use(cors());
 app.use(express.static('dist'));
-app.use(express.json());
 
 app.get('/api/persons', (req, res, next) => {
     Person.find({}).then(p => {
@@ -63,6 +63,16 @@ app.post('/api/persons', (req, res, next) => {
     person.save().then(added => res.status(200).json(added))
         .catch(error => next(error));
 });
+
+app.put('/api/persons/:id', (req, res, next) => {
+
+    Person.findByIdAndUpdate(req.params.id, {
+        name: req.body.name,
+        number: req.body.number
+    }).then(
+        () => res.status(200).json(req.body)
+    ).catch(error => next(error));
+})
 
 app.use(errorHandler);
 
