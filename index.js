@@ -11,9 +11,13 @@ morgan.token('body', (req, res) => JSON.stringify(req.body));
 
 const errorHandler = (error, req, res, next) => {
     console.error(error);
-    error.name === 'CastError' ?
-        res.status(400).send({ error: 'malformatted id' })
-        : res.status(500).end
+
+    if (error.name === 'CastError') {
+        return res.status(400).send({ error: 'malformatted id' });
+    }
+    else if (error.name === 'ValidationError') {
+        return res.status(400).json({ error: error._message })
+    }
 
     next(error);
 }
@@ -69,7 +73,7 @@ app.put('/api/persons/:id', (req, res, next) => {
     Person.findByIdAndUpdate(req.params.id, {
         name: req.body.name,
         number: req.body.number
-    }).then(
+    }, { runValidators: true }).then(
         () => res.status(200).json(req.body)
     ).catch(error => next(error));
 })
