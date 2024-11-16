@@ -8,7 +8,8 @@
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:ui": "shx rm -rf dist && cd c:/Users/on/Documents/Fullstack-open/part2/phonebook && npm run build && shx cp -r dist c:/Users/on/Desktop/fullstack-open-part3",
-    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push"
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
+    "lint": "eslint ."
   },
   "author": "",
   "license": "ISC",
@@ -21,6 +22,10 @@
     "static": "^2.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@stylistic/eslint-plugin-js": "^2.10.1",
+    "eslint": "^9.15.0",
+    "globals": "^15.12.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.7",
     "shx": "^0.3.4"
